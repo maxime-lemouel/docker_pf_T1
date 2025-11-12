@@ -1,0 +1,42 @@
+FROM php:8.1-fpm
+
+# Installation des dépendances système
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    nodejs \
+    npm \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
+# Installation des extensions PHP nécessaires pour Laravel
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+# Installation de Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Définir le répertoire de travail
+WORKDIR /var/www/html
+
+# Copier du projet git
+RUN git clone https://github.com/MagnusDot/TP-Final-3IW-ESGI.git .
+COPY welcome.blade2.php ./resources/views/welcome.blade.php
+
+# Copier le script d'entrée
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
+
+# Exposer le port 9000 pour PHP-FPM
+EXPOSE 9000
+
+# Définir le script d'entrée
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
