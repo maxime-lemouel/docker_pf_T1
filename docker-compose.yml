@@ -34,9 +34,17 @@ services:
       - DB_USERNAME=laravel
       - DB_PASSWORD=laravel
       - RUN_MIGRATIONS=true
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
+      - MAIL_USERNAME=null
+      - MAIL_PASSWORD=null
+      - MAIL_ENCRYPTION=null
+      - MAIL_FROM_ADDRESS=hello@example.com
+      - MAIL_FROM_NAME="Laravel App"
     depends_on:
-      mysql:
-        condition: service_healthy
+      - mysql
+      - mailhog
 
   # PHP Service 2
   php2:
@@ -53,9 +61,15 @@ services:
       - DB_DATABASE=laravel
       - DB_USERNAME=laravel
       - DB_PASSWORD=laravel
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
+      - MAIL_USERNAME=null
+      - MAIL_PASSWORD=null
+      - MAIL_ENCRYPTION=null
     depends_on:
-      mysql:
-        condition: service_healthy
+      - mysql
+      - mailhog
 
   # Nginx Service 1
   nginx1:
@@ -84,6 +98,15 @@ services:
       - app_network
     depends_on:
       - php2
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "8025:8025"  
+      - "1025:1025"   
+    networks:
+      - app_network
 
 networks:
   app_network:

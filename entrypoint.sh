@@ -35,6 +35,13 @@ if [ ! -f .env ]; then
     sed -i "s/DB_DATABASE=.*/DB_DATABASE=${DB_DATABASE}/" .env
     sed -i "s/DB_USERNAME=.*/DB_USERNAME=${DB_USERNAME}/" .env
     sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=${DB_PASSWORD}/" .env
+    sed -i "s/MAIL_MAILER=.*/MAIL_MAILER=${MAIL_MAILER}/" .env
+    sed -i "s/MAIL_HOST=.*/MAIL_HOST=${MAIL_HOST}/" .env
+    sed -i "s/MAIL_PORT=.*/MAIL_PORT=${MAIL_PORT}/" .env
+    sed -i "s/MAIL_USERNAME=.*/MAIL_USERNAME=${MAIL_USERNAME}/" .env
+    sed -i "s/MAIL_PASSWORD=.*/MAIL_PASSWORD=${MAIL_PASSWORD}/" .env
+    sed -i "s/MAIL_ENCRYPTION=.*/MAIL_ENCRYPTION=${MAIL_ENCRYPTION}/" .env
+
 
     echo "Génération de la clé d'application..."
     php artisan key:generate --force
