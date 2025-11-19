@@ -41,10 +41,12 @@ services:
       - MAIL_PASSWORD=null
       - MAIL_ENCRYPTION=null
       - MAIL_FROM_ADDRESS=hello@example.com
-      - MAIL_FROM_NAME="Laravel App"
+      - MAIL_FROM_NAME=Laravel App
     depends_on:
-      - mysql
-      - mailhog
+      mysql:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
 
   # PHP Service 2
   php2:
@@ -67,10 +69,13 @@ services:
       - MAIL_USERNAME=null
       - MAIL_PASSWORD=null
       - MAIL_ENCRYPTION=null
+      - MAIL_FROM_ADDRESS=hello@example.com
+      - MAIL_FROM_NAME=Laravel App
     depends_on:
-      - mysql
-      - mailhog
-
+      mysql:
+       condition: service_healthy
+      mailhog:
+        condition: service_started
   # Nginx Service 1
   nginx1:
     image: nginx:alpine
@@ -86,9 +91,9 @@ services:
       - php1
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.serveur1.rule=Host(`serveur1`)"
-      - "traefik.http.routers.serveur1.entrypoints=web"
-      - "traefik.http.services.serveur1.loadbalancer.server.port=80"
+      - "traefik.http.routers.nginx1.rule=Host(`serveur1.localhost`)"
+      - "traefik.http.routers.nginx1.entrypoints=web"
+      - "traefik.http.services.nginx1.loadbalancer.server.port=80"
   # Nginx Service 2
   nginx2:
     image: nginx:alpine
@@ -102,7 +107,12 @@ services:
       - app_network
     depends_on:
       - php2
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nginx2.rule=Host(`serveur2.localhost`)"
+      - "traefik.http.routers.nginx2.entrypoints=web"
+      - "traefik.http.services.nginx2.loadbalancer.server.port=80"
+  # mail
   mailhog:
     image: mailhog/mailhog
     container_name: mailhog
@@ -111,13 +121,17 @@ services:
       - "1025:1025"   
     networks:
       - app_network
+
+  #Traefik
   traefik:
     image: traefik:v2.11
+    container_name: traefik
     command:
       - "--api.dashboard=true"
+      - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.http.address=:80"
+      - "--entrypoints.web.address=:80"
     ports:
       - "80:80"
       - "8080:8080"
@@ -125,6 +139,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - app_network
+
 networks:
   app_network:
     driver: bridge
