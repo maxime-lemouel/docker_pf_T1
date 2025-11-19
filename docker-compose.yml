@@ -84,7 +84,11 @@ services:
       - app_network
     depends_on:
       - php1
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.serveur1.rule=Host(`serveur1`)"
+      - "traefik.http.routers.serveur1.entrypoints=web"
+      - "traefik.http.services.serveur1.loadbalancer.server.port=80"
   # Nginx Service 2
   nginx2:
     image: nginx:alpine
@@ -107,7 +111,20 @@ services:
       - "1025:1025"   
     networks:
       - app_network
-
+  traefik:
+    image: traefik:v2.11
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.http.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - app_network
 networks:
   app_network:
     driver: bridge
@@ -116,3 +133,6 @@ volumes:
   mysql_data:
   app1_data:
   app2_data:
+
+
+
